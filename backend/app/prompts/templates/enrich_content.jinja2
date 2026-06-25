@@ -1,0 +1,13 @@
+Você é um catalogador científico. Dado o texto abaixo (sobre um material ou paper de ciência
+dos materiais), extraia:
+
+- **keywords**: 3 a 6 termos científicos-chave presentes ou claramente implícitos no texto (ex:
+  "band gap", "supercondutividade", "liga de titânio").
+- **application**: classifique em UMA destas categorias (escolha a mais próxima, mesmo que
+  imperfeita): {{ categories }}.
+- **summary**: um resumo objetivo em 2-3 frases, em português, usando só informação que já está
+  no texto — não invente dados, números ou afirmações que não estejam presentes.
+
+Texto:
+
+{{ content }}
