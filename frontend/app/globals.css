@@ -165,6 +165,101 @@ header p {
   position: relative;
 }
 
+.material-cards,
+.paper-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.material-card {
+  flex: 1 1 220px;
+  min-width: 200px;
+  border-radius: 10px;
+  border: 1px solid #2a3550;
+  background: var(--bg);
+  padding: 0.7rem 0.85rem;
+}
+
+.material-card.highlighted {
+  border-color: var(--accent);
+}
+
+.material-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.material-card-name {
+  font-weight: 600;
+}
+
+.source-badge {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border: 1px solid #2a3550;
+  border-radius: 6px;
+  padding: 0.1rem 0.4rem;
+  white-space: nowrap;
+}
+
+.material-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.material-card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.material-card-row span:last-child {
+  color: var(--text);
+}
+
+.material-card-note {
+  margin: 0.45rem 0 0;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.paper-card {
+  flex: 1 1 240px;
+  min-width: 220px;
+  border-radius: 10px;
+  border: 1px solid #2a3550;
+  background: var(--bg);
+  padding: 0.6rem 0.85rem;
+}
+
+.paper-card-title {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text);
+  text-decoration: none;
+}
+
+a.paper-card-title:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.paper-card-meta {
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 .error {
   color: #ff6b6b;
 }

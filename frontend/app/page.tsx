@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import ReactMarkdown from "react-markdown";
 import CrystalViewer from "./components/CrystalViewer";
+import MaterialCard, { type RankingItem } from "./components/MaterialCard";
+import PaperCard, { type PaperItem } from "./components/PaperCard";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
 const STORAGE_KEY = "materialgpt:chat";
@@ -12,6 +14,8 @@ type Message = {
   content: string;
   intent?: string;
   cif?: string;
+  ranking?: RankingItem[];
+  papers?: PaperItem[];
 };
 
 type ProgressStep = {
@@ -122,6 +126,8 @@ export default function Home() {
                 content: payload.report,
                 intent: payload.intent,
                 cif: payload.structure_cif ?? undefined,
+                ranking: payload.ranking ?? [],
+                papers: payload.papers ?? [],
               },
             ]);
           }
@@ -169,6 +175,20 @@ export default function Home() {
             {message.role === "assistant" ? (
               <>
                 {message.cif && <CrystalViewer cif={message.cif} />}
+                {message.ranking && message.ranking.length > 0 && (
+                  <div className="material-cards">
+                    {message.ranking.map((material, i) => (
+                      <MaterialCard key={i} material={material} highlighted={i === 0} />
+                    ))}
+                  </div>
+                )}
+                {message.papers && message.papers.length > 0 && (
+                  <div className="paper-cards">
+                    {message.papers.map((paper, i) => (
+                      <PaperCard key={i} paper={paper} />
+                    ))}
+                  </div>
+                )}
                 <ReactMarkdown>{message.content}</ReactMarkdown>
               </>
             ) : (
