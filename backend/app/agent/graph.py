@@ -19,6 +19,7 @@ from app.agent.nodes.reflection import node_reflection
 from app.agent.nodes.report_generator import node_report_generator
 from app.agent.nodes.simulation import node_simulation
 from app.agent.nodes.simulation_planner import node_simulation_planner
+from app.agent.nodes.structure_enrichment import node_structure_enrichment
 from app.agent.state import MaterialState
 
 SIMPLE_INTENT_NODES = {
@@ -60,6 +61,7 @@ def build_graph():
     graph.add_node("quantum_optimization", node_quantum_optimization)
     graph.add_node("ranker", node_ranker)
     graph.add_node("aggregator", node_aggregator)
+    graph.add_node("structure_enrichment", node_structure_enrichment)
     graph.add_node("report_generator", node_report_generator)
 
     # V5 — Scientific Agent (intenção material_discovery)
@@ -80,7 +82,8 @@ def build_graph():
         graph.add_edge(intent_node, "ranker")
 
     graph.add_edge("ranker", "aggregator")
-    graph.add_edge("aggregator", "report_generator")
+    graph.add_edge("aggregator", "structure_enrichment")
+    graph.add_edge("structure_enrichment", "report_generator")
 
     # Loop V5: hypothesis -> generator -> simulation_planner -> critic -> (reflection -> generator) | report
     graph.add_edge("node_hypothesis", "node_material_generator")

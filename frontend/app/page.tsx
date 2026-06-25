@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import ReactMarkdown from "react-markdown";
+import CrystalViewer from "./components/CrystalViewer";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
 const STORAGE_KEY = "materialgpt:chat";
@@ -10,6 +11,7 @@ type Message = {
   role: "user" | "assistant";
   content: string;
   intent?: string;
+  cif?: string;
 };
 
 type ProgressStep = {
@@ -115,7 +117,12 @@ export default function Home() {
             setSessionId(payload.session_id);
             setMessages((prev) => [
               ...prev,
-              { role: "assistant", content: payload.report, intent: payload.intent },
+              {
+                role: "assistant",
+                content: payload.report,
+                intent: payload.intent,
+                cif: payload.structure_cif ?? undefined,
+              },
             ]);
           }
         }
@@ -160,7 +167,10 @@ export default function Home() {
           <div key={index} className={`message ${message.role}`}>
             {message.intent && <span className="intent">{message.intent}</span>}
             {message.role === "assistant" ? (
-              <ReactMarkdown>{message.content}</ReactMarkdown>
+              <>
+                {message.cif && <CrystalViewer cif={message.cif} />}
+                <ReactMarkdown>{message.content}</ReactMarkdown>
+              </>
             ) : (
               <p>{message.content}</p>
             )}

@@ -51,6 +51,7 @@ def chat(request: ChatRequest) -> ChatResponse:
         materials=result.get("materials", []),
         papers=result.get("papers", []),
         ranking=ranking,
+        structure_cif=result.get("candidate_structure_cif") or None,
     )
 
 
@@ -95,6 +96,7 @@ def chat_stream(request: ChatRequest) -> StreamingResponse:
             "materials": state.get("materials", []),
             "papers": state.get("papers", []),
             "ranking": ranking,
+            "structure_cif": state.get("candidate_structure_cif") or None,
         }
         yield f"data: {json.dumps(final_payload, ensure_ascii=False, default=str)}\n\n"
 

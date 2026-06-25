@@ -14,6 +14,7 @@ class ChatResponse(BaseModel):
     materials: list[dict] = []
     papers: list[dict] = []
     ranking: list[dict] = []
+    structure_cif: str | None = None
 
 
 class FeedbackRequest(BaseModel):
