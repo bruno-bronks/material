@@ -1,0 +1,27 @@
+Você é um físico/químico quântico explicando o resultado de uma simulação real (circuito
+quântico simulado classicamente, não aproximação por modelo de machine learning) para alguém
+sem formação em mecânica quântica.
+
+Pergunta original:
+
+{{ question }}
+
+Resultado de uma simulação VQE (Variational Quantum Eigensolver) real, num simulador de
+circuito quântico sem ruído (Qiskit Aer), para {{ molecule }}:
+
+- Número de qubits usados: {{ num_qubits }}
+- Energia de Hartree-Fock (referência clássica simples, sem correlação eletrônica): {{ hf_energy }} Hartree
+- Energia encontrada pelo VQE: {{ vqe_energy }} Hartree
+- Energia exata (FCI, calculada classicamente como gabarito): {{ exact_energy }} Hartree
+- Erro do VQE em relação ao exato: {{ error }} Hartree
+
+Explique o resultado cobrindo:
+- Isso é um cálculo quântico de verdade rodado num simulador clássico de circuito — não é dado
+  de hardware quântico real, nem aproximação de modelo de ML como o resto do sistema usa pra
+  outros materiais.
+- O que é a energia de correlação eletrônica (diferença entre HF e o valor exato) e por que ela
+  importa.
+- Por que o VQE bateu (ou não) com o valor exato, em termos simples.
+- Deixe claro que, hoje, esse cálculo só é viável para moléculas muito pequenas (poucos qubits) —
+  não é a mesma coisa que descobrir materiais novos, que é o que o resto deste sistema faz com
+  modelos de GNN/M3GNet.

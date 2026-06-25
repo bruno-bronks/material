@@ -12,6 +12,7 @@ from app.agent.nodes.material_search import node_material_search
 from app.agent.nodes.paper_search import node_paper_search
 from app.agent.nodes.planner import node_planner
 from app.agent.nodes.property_prediction import node_property_prediction
+from app.agent.nodes.quantum_chemistry import node_quantum_chemistry
 from app.agent.nodes.ranker import node_ranker
 from app.agent.nodes.reflection import node_reflection
 from app.agent.nodes.report_generator import node_report_generator
@@ -26,6 +27,7 @@ SIMPLE_INTENT_NODES = {
     "paper_search": "paper_search",
     "simulation": "simulation",
     "property_prediction": "property_prediction",
+    "quantum_chemistry": "quantum_chemistry",
 }
 
 
@@ -52,6 +54,7 @@ def build_graph():
     graph.add_node("compare_materials", node_compare_materials)
     graph.add_node("property_prediction", node_property_prediction)
     graph.add_node("simulation", node_simulation)
+    graph.add_node("quantum_chemistry", node_quantum_chemistry)
     graph.add_node("ranker", node_ranker)
     graph.add_node("aggregator", node_aggregator)
     graph.add_node("report_generator", node_report_generator)

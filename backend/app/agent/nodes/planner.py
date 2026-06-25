@@ -10,6 +10,7 @@ VALID_INTENTS = {
     "simulation",
     "property_prediction",
     "material_discovery",
+    "quantum_chemistry",
 }
 
 
