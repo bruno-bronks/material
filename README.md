@@ -334,6 +334,29 @@ material com estrutura "monoclínica" como se fosse grafeno (que é hexagonal) �
 outro alótropo de carbono do banco de dados sendo confundido. `explain_material` não trata bem
 materiais 2D nos bancos de dados focados em estruturas 3D (AFLOW/MP/OQMD). Não corrigido ainda.
 
+## Enrich real no pipeline de ingestão — de `Context_Engineering.md`
+
+Revisitando o doc mais antigo do projeto (Parte 2), cruzei o pipeline ETL descrito (Extract →
+Transform → **Validate** → **Enrich** → Store) com `backend/app/ingestion/pipeline.py` real.
+Achado: o "Enrich" nunca existia — chunks iam direto do dado da tool pra o Chroma, com metadado
+raso (`source`/`doi`/`year`/`authors`). E a coleção `summaries` (declarada em
+`vectorstore.py`/`context_builder.py`, consultada em **toda** pergunta do chat) nunca era
+populada por nada — sempre vazia, sempre um round-trip ao Chroma sem retorno.
+
+* `backend/app/ingestion/enrich.py` — uma chamada de LLM por paper/material (não por chunk)
+  extrai `keywords` e classifica `application` numa categoria controlada (baterias,
+  aeroespacial, semicondutores etc. — as mesmas categorias citadas no próprio doc), e gera um
+  resumo curto, tudo a partir do texto real, via `with_structured_output`.
+* O resumo passa a popular a coleção `summaries` de verdade; `keywords`/`application` passam a
+  fazer parte do metadado de cada chunk em `papers`/`materials`.
+* Deixei `temperature_range` (que está no schema de metadado do doc) de fora deliberadamente —
+  não tem como extrair isso de um abstract de paper sem risco real de inventar um número que não
+  está lá.
+* Validado na VPS: `POST /api/ingest` com "titanium alloy aerospace" indexou 8 papers + 4
+  materiais, e a coleção `summaries` (antes sempre com `count=0`) passou a ter 12 entradas, com
+  `application: "aeroespacial"` corretamente classificada e `keywords` reais extraídas do texto
+  (não fabricadas). `/api/chat` confirmado funcionando normalmente depois da mudança.
+
 ## Quantum Chemistry & Optimization — de `Quantum_Research_Assistant.md` (`backend/app/quantum/`)
 
 Documento separado (QRA), descrevendo um sistema de 10 agentes pra pesquisa em computação
