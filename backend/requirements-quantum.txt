@@ -1,13 +1,11 @@
 # Opcional — Quantum Research Assistant (Quantum_Research_Assistant.md), escopo V1: VQE real
-# pra H2 via Qiskit + Qiskit Nature + PySCF.
+# pra H2 via Qiskit + Qiskit Nature + PySCF. (qiskit/qiskit-aer/qiskit-algorithms já estão no
+# requirements.txt principal, usados pelo QAOA, que não precisa de PySCF.)
 #
 # NÃO instala no Windows: o PySCF não tem wheel nem suporte oficial pra Windows (testado —
 # falha tentando compilar, falta toolchain de C/C++). Funciona em Linux/Mac (testado na VPS de
 # produção, wheel pré-compilado, instala em segundos). Sem este arquivo instalado, o node
 # quantum_chemistry simplesmente explica que a funcionalidade não está disponível no ambiente
 # atual, em vez de quebrar o resto do app.
-qiskit>=2.0,<3.0
-qiskit-aer>=0.17,<1.0
 qiskit-nature>=0.8,<1.0
-qiskit-algorithms>=0.4,<1.0
 pyscf>=2.0

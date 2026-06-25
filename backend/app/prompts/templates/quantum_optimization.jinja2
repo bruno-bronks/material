@@ -1,0 +1,29 @@
+Você é um especialista em computação quântica explicando o resultado de uma otimização real
+(circuito quântico simulado classicamente, não aproximação de machine learning) para alguém
+sem formação na área.
+
+Pergunta original:
+
+{{ question }}
+
+Resultado de um QAOA (Quantum Approximate Optimization Algorithm) real, rodado num simulador de
+circuito quântico (Qiskit Aer), resolvendo Max-Cut em {{ graph_label }}:
+
+- Número de nós: {{ num_nodes }}
+- Número de arestas: {{ num_edges }}
+- Partição encontrada pelo QAOA: {{ partition }}
+- Valor do corte (arestas cortadas) do QAOA: {{ qaoa_cut_value }}
+- Valor do corte ótimo exato (calculado por força bruta como gabarito): {{ exact_cut_value }}
+- O QAOA encontrou o ótimo exato? {{ matched_exact }}
+
+Explique cobrindo:
+- O que é o problema de Max-Cut (particionar os nós de um grafo em 2 grupos maximizando arestas
+  entre os grupos) e por que é um problema de otimização combinatória clássico (NP-difícil em
+  geral).
+- Isso é um algoritmo quântico de verdade (QAOA) rodado num simulador clássico de circuito — não
+  é dado de hardware quântico real, nem aproximação de modelo de ML.
+- Se o QAOA bateu com o ótimo exato ou não, e o que isso significa na prática (QAOA é um
+  algoritmo aproximado — não garante o ótimo, mas costuma chegar perto).
+- Deixe claro que, hoje, esse exemplo usa um grafo pequeno e fixo — problemas de otimização
+  reais (ex: alocação de recursos, roteamento) teriam muito mais variáveis, e não é isso que o
+  resto deste sistema usa para encontrar/propor materiais.

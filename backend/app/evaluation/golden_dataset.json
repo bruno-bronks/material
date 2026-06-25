@@ -14,5 +14,7 @@
   {"id": "paper-1", "category": "paper_search", "question": "Pesquisas recentes sobre supercondutores"},
   {"id": "prop-1", "category": "property_prediction", "question": "Preveja as propriedades mecânicas do silício"},
   {"id": "sim-1", "category": "simulation", "question": "Quais métodos de simulação são adequados para o silício?"},
-  {"id": "discovery-1", "category": "material_discovery", "question": "Proponha um substituto mais barato para o ouro em contatos elétricos"}
+  {"id": "discovery-1", "category": "material_discovery", "question": "Proponha um substituto mais barato para o ouro em contatos elétricos"},
+  {"id": "qchem-1", "category": "quantum_chemistry", "question": "qual a energia do H2 via VQE?"},
+  {"id": "qopt-1", "category": "quantum_optimization", "question": "resolva um problema de otimização com QAOA"}
 ]
