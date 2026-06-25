@@ -329,6 +329,29 @@ npm run dev
 
 Abra http://localhost:3000 com o backend em http://localhost:8000.
 
+## Produção
+
+Rodando em **https://material.bronks.ia.br** (VPS compartilhada com outros projetos —
+`leao`/`ligas`/`maya`.bronks.ia.br — mesmo IP, sem conflito de porta).
+
+* **Backend**: `/opt/material/backend`, venv nativo, `systemd` (`material-backend.service`),
+  escutando só em `127.0.0.1:8002` (nunca exposto direto).
+* **Frontend**: Docker (`frontend/Dockerfile`, multi-stage), container `material-frontend` em
+  `127.0.0.1:3011`, `NEXT_PUBLIC_API_BASE_URL=/api` (caminho relativo — mesma origem do backend
+  via nginx, sem CORS).
+* **nginx**: `/etc/nginx/sites-available/material.bronks.ia.br` roteia `/api/` → backend
+  (`proxy_buffering off` — obrigatório pro streaming SSE funcionar atrás do proxy) e `/` →
+  frontend. Certificado Let's Encrypt via `certbot --nginx`, renovação automática já agendada.
+* **Rate limit** (`/etc/nginx/conf.d/material-ratelimit.conf`): 10 req/min por IP em `/api/`,
+  rajada de 5 sem delay — `/api/chat` e `/api/chat/stream` chamam a OpenAI a cada requisição
+  (custo real), e o endpoint é público sem autenticação. Validado: ~6 requisições passam, depois
+  `429` até o limite renovar; não afeta os outros sites na mesma VPS (zona isolada por nome).
+* Deploy via `git pull` em `/opt/material` + restart do service/container — sem CI/CD automático
+  ainda.
+* Cópias de referência das configs (nginx, systemd) em [`deploy/`](deploy/) — a config real fica
+  na VPS; se o servidor precisar ser recriado, regenere o certificado com `certbot --nginx` em
+  vez de copiar os caminhos de certificado literalmente.
+
 ## Endpoints da API
 
 * `GET  /api/health`

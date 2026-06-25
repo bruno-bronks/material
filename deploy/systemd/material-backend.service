@@ -1,0 +1,13 @@
+# /etc/systemd/system/material-backend.service na VPS.
+[Unit]
+Description=MaterialGPT Backend API
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/material/backend
+ExecStart=/opt/material/backend/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8002
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
