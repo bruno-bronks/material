@@ -1,4 +1,6 @@
-from app.tools.elements import extract_elements, extract_formula
+import pytest
+
+from app.tools.elements import ELEMENT_SYMBOLS, extract_elements, extract_formula, suggest_elements
 
 
 def test_extract_formula_explicit():
@@ -20,3 +22,11 @@ def test_extract_elements_from_formula():
 
 def test_extract_elements_empty_for_unrelated_text():
     assert extract_elements("qual o clima hoje") == []
+
+
+@pytest.mark.network
+@pytest.mark.slow
+def test_suggest_elements_for_conceptual_question_without_explicit_element():
+    suggested = suggest_elements("material para bateria de estado sólido")
+    assert 1 <= len(suggested) <= 2
+    assert all(el in ELEMENT_SYMBOLS for el in suggested)

@@ -1,5 +1,9 @@
 import re
 
+from app.llm.client import get_llm
+from app.prompts.loader import render_prompt
+from app.schemas.materials import ElementSuggestion
+
 ELEMENT_SYMBOLS = {
     "H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na", "Mg", "Al", "Si",
     "P", "S", "Cl", "Ar", "K", "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co",
@@ -67,3 +71,24 @@ def extract_elements(text: str) -> list[str]:
         found.update(_ELEMENT_TOKEN_RE.findall(formula))
 
     return sorted(found)
+
+
+def suggest_elements(question: str) -> list[str]:
+    """Fallback via LLM para perguntas conceituais sem elemento/fórmula explícita
+    (ex: "bateria de estado sólido", "material resistente a ácido sulfúrico").
+
+    Sem isso, essas perguntas não acionavam nenhuma tool real (Materials Project/
+    OQMD/AFLOW) e o material_search ficava só com o RAG local — que, fora do tópico
+    perguntado, pode estar cheio de dados de outra coisa (ex: titânio de testes
+    anteriores) e o LLM acaba ancorando a resposta nisso em vez de admitir que não
+    tinha boa base.
+    """
+    prompt = render_prompt("suggest_elements.jinja2", question=question)
+    try:
+        suggestion = get_llm(temperature=0).with_structured_output(ElementSuggestion).invoke(prompt)
+    except Exception:
+        return []
+
+    # Cap defensivo em 2: AFLOW exige todos os elementos pedidos presentes ao mesmo
+    # tempo, então mais que isso torna a busca rara demais mesmo se o LLM ignorar o prompt.
+    return [el for el in suggestion.elements if el in ELEMENT_SYMBOLS][:2]

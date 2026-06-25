@@ -1,0 +1,18 @@
+[
+  {"id": "bat-1", "category": "baterias", "question": "material para bateria sem lítio"},
+  {"id": "bat-2", "category": "baterias", "question": "material para bateria de estado sólido"},
+  {"id": "sc-1", "category": "supercondutores", "question": "supercondutor temperatura ambiente"},
+  {"id": "sc-2", "category": "supercondutores", "question": "materiais para supercondutores de alta Tc"},
+  {"id": "liga-1", "category": "ligas_metalicas", "question": "liga para turbina"},
+  {"id": "liga-2", "category": "ligas_metalicas", "question": "material resistente acima de 1000°C"},
+  {"id": "corr-1", "category": "corrosao", "question": "material para ambiente marinho"},
+  {"id": "corr-2", "category": "corrosao", "question": "material resistente a ácido sulfúrico"},
+  {"id": "semi-1", "category": "semicondutores", "question": "alternativas ao silício"},
+  {"id": "semi-2", "category": "semicondutores", "question": "materiais para chips de próxima geração"},
+  {"id": "compare-1", "category": "compare_materials", "question": "Titânio vs Inconel para alta temperatura"},
+  {"id": "explain-1", "category": "explain_material", "question": "Explique o grafeno"},
+  {"id": "paper-1", "category": "paper_search", "question": "Pesquisas recentes sobre supercondutores"},
+  {"id": "prop-1", "category": "property_prediction", "question": "Preveja as propriedades mecânicas do silício"},
+  {"id": "sim-1", "category": "simulation", "question": "Quais métodos de simulação são adequados para o silício?"},
+  {"id": "discovery-1", "category": "material_discovery", "question": "Proponha um substituto mais barato para o ouro em contatos elétricos"}
+]

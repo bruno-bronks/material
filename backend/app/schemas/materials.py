@@ -29,3 +29,7 @@ class CompareOutput(BaseModel):
     winner: str
     explanation: str
     confidence: float
+
+
+class ElementSuggestion(BaseModel):
+    elements: list[str]

@@ -1,0 +1,25 @@
+Você é um avaliador científico revisando a resposta de um assistente de ciência de materiais.
+Você não tem acesso a uma resposta "correta" de referência — avalie a qualidade intrínseca da
+resposta abaixo, não se ela bate com algum gabarito externo.
+
+Pergunta do usuário:
+
+{{ question }}
+
+Resposta do assistente:
+
+{{ report }}
+
+Avalie, numa escala de 1 (péssimo) a 5 (excelente):
+
+- **relevance**: a resposta de fato responde à pergunta feita?
+- **faithfulness**: a resposta é internamente consistente com os dados/fontes que ela mesma cita
+  (não se contradiz, não afirma uma coisa num trecho e o oposto em outro)?
+- **hallucination_risk**: risco de alucinação. 1 = toda afirmação numérica relevante está
+  atribuída a uma fonte/modelo citado explicitamente (ex: "MEGNet", "AFLOW", "Materials
+  Project"); 5 = números ou fatos específicos aparecem sem nenhuma atribuição de origem.
+- **confidence_calibration**: quando a resposta declara um nível de confiança, ele é coerente
+  com a qualidade da evidência apresentada (não afirma confiança alta para algo claramente
+  especulativo, nem confiança baixa para algo bem fundamentado)?
+
+Dê um veredito geral (`passed`: true/false) e uma justificativa breve e objetiva (`reasoning`).

@@ -1,6 +1,6 @@
 from app.gnn.enrich import enrich_with_gnn
 from app.tools import aflow, arxiv, crossref, materials_project, oqmd, pubchem, semantic_scholar
-from app.tools.elements import extract_elements, extract_formula
+from app.tools.elements import extract_elements, extract_formula, suggest_elements
 
 
 def search_materials(question: str, limit: int = 5) -> list[dict]:
@@ -14,6 +14,16 @@ def search_materials(question: str, limit: int = 5) -> list[dict]:
         results.extend(oqmd.search_by_composition(formula, limit=limit))
     if elements:
         results.extend(aflow.search_by_species(elements, limit=limit))
+
+    if not results:
+        # Pergunta conceitual sem elemento/fórmula explícito (ex: "bateria de estado
+        # sólido") — pede ao LLM candidatos plausíveis antes de desistir, em vez de
+        # deixar a resposta se basear só no que sobrou no RAG local.
+        suggested = suggest_elements(question)
+        if suggested:
+            results.extend(aflow.search_by_species(suggested, limit=limit))
+            results.extend(materials_project.search_by_formula("".join(suggested), limit=limit))
+
     if not results:
         results.extend(pubchem.search_by_name(question))
 

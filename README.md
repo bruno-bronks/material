@@ -1,4 +1,4 @@
-# MaterialGPT — V1 (RAG) + V2 (GNN) + V3 (Property Prediction) + V4 (Simulação) + V5 (Scientific Agent) + V6 lite (Active Learning)
+# MaterialGPT — V1-V6 lite + Harness/Evaluation (Parte 5)
 
 Implementação do MaterialGPT a partir da documentação em `*.md` na raiz do projeto
 (`Design_docs.md`, `Context_Engineering.md`, `Prompt_Template.md`, `ToolCalling_Memory_RAG.md`,
@@ -265,6 +265,75 @@ Depois de empilhar V1→V6 lite, parei pra fortalecer o que já existia em vez d
     hook `pytest_configure` — os testes não tocam nos dados de desenvolvimento em `backend/data/`.
   * Rodar tudo: `pytest`. Só os rápidos: `pytest -m "not slow and not network"`.
 
+## Harness, Evaluation & Observability (`Harness_Evaluation_Observability.md`, Parte 5)
+
+Até aqui (V1-V6 lite) o projeto fazia o sistema *funcionar*. Esta parte é sobre *medir se ele
+funciona bem* — o doc pede golden dataset (1000+ perguntas), métricas como Faithfulness/
+Hallucination Rate/Recall/Precision, LLM-as-a-Judge, e observability via LangSmith/Phoenix/
+OpenTelemetry. Implementação realista (`backend/app/evaluation/`):
+
+* **Golden dataset** (`golden_dataset.json`) — 16 perguntas-semente cobrindo as 5 categorias do
+  doc (baterias, supercondutores, ligas metálicas, corrosão, semicondutores) **e** todas as 7
+  intenções do agente (`material_search` até `material_discovery`). Escala reduzida do "1000+"
+  do doc, mas fácil de expandir — é só adicionar entradas no JSON.
+* **LLM-as-a-Judge** (`judge.py` + `evaluation_judge.jinja2`) — sem gabarito de referência
+  (nenhum especialista humano curou respostas corretas), o juiz avalia qualidade **intrínseca**:
+  `relevance`, `faithfulness`, `hallucination_risk`, `confidence_calibration` (1-5 cada) +
+  veredito `passed`. Recall/Precision/Citation Accuracy do doc original exigiriam respostas de
+  referência que não temos — não inventei isso.
+  * Usa o mesmo provider (GPT) que gera as respostas — risco conhecido de viés de
+    autoavaliação. LangSmith/Phoenix ficaram de fora por exigirem conta externa (mesma lógica
+    de "local/free" do resto do projeto); ficam documentados como alternativa real no doc.
+* **Runner** (`runner.py`, `python -m app.evaluation.runner`) — roda cada pergunta pelo grafo
+  completo, manda a resposta pro juiz, salva um relatório JSON em `backend/data/eval_runs/`.
+  **Não rodar em paralelo com o backend ligado** — os dois processos disputam o lock do SQLite
+  do Chroma e o segundo trava com *segmentation fault* (achado durante o desenvolvimento desta
+  própria feature).
+
+### O harness encontrou bugs reais — e eles foram corrigidos
+
+Primeira rodada: **12/16 (75%)**. As 4 reprovações revelaram um padrão real:
+
+| Pergunta | Problema encontrado pelo juiz |
+|---|---|
+| "material para bateria de estado sólido" | Resposta focou em titânio (irrelevante) em vez de eletrólitos sólidos |
+| "material resistente a ácido sulfúrico" | Citou uma liga sem nenhuma base real de resistência a ácido |
+| "materiais para chips de próxima geração" | Focou em metais estruturais, não em semicondutores emergentes |
+| "Pesquisas recentes sobre supercondutores" | Único paper citado era de 2015 — não é "recente" |
+
+**Causa raiz das 3 primeiras**: a heurística de extração de elementos (`tools/elements.py`) não
+tem cobertura pra perguntas conceituais sem elemento/fórmula explícito. Sem isso, nenhuma tool
+real (Materials Project/OQMD/AFLOW) era acionada, e o sistema caía pro RAG local — que, fora do
+tópico perguntado, ainda tinha bastante dado de titânio de sessões de teste anteriores. O LLM
+ancorava a resposta nesse contexto irrelevante em vez de admitir que não tinha boa base.
+
+**Correção**: `suggest_elements()` (`tools/elements.py`) — quando a extração por palavra-chave
+falha, pede ao LLM exatamente 2 elementos plausíveis (AFLOW exige todos os elementos pedidos
+presentes simultaneamente, então mais que isso torna a busca rara demais) antes de desistir.
+Resultado real: "bateria de estado sólido" → Li+P (eletrólitos Li-P-S, uma família real); "ácido
+sulfúrico" → Ni+Cr (a mesma química do Inconel/Hastelloy); "chips de próxima geração" → Si+Ge
+(SiGe, material real usado em chips avançados).
+
+**Correção da recência**: `arxiv.py`/`crossref.py` agora misturam resultados por relevância com
+uma busca extra ordenada por data — antes só havia ranking por relevância, que pode trazer um
+artigo antigo bem casado por palavra-chave. Semantic Scholar ficou de fora dessa correção (rate
+limit impediu validar o parâmetro de ordenação com confiança).
+
+**Segunda rodada, após as correções: 16/16 (100%)**. Todas as métricas melhoraram:
+
+| Métrica | Antes | Depois |
+|---|---|---|
+| Pass rate | 75% | **100%** |
+| Relevância média | 4.44/5 | 4.81/5 |
+| Fidelidade média | 4.88/5 | 4.94/5 |
+| Risco de alucinação médio | 2.62/5 | **1.94/5** |
+| Calibração de confiança média | 4.31/5 | 4.62/5 |
+
+Achado residual menor (passou, mas vale registrar): ao explicar grafeno, a resposta citou um
+material com estrutura "monoclínica" como se fosse grafeno (que é hexagonal) — provavelmente
+outro alótropo de carbono do banco de dados sendo confundido. `explain_material` não trata bem
+materiais 2D nos bancos de dados focados em estruturas 3D (AFLOW/MP/OQMD). Não corrigido ainda.
+
 ## Como rodar
 
 ### 1. Backend
@@ -401,20 +470,23 @@ Rodando em **https://material.bronks.ia.br** (VPS compartilhada com outros proje
 
 ## Próximos passos sugeridos
 
+* `explain_material` não trata bem materiais 2D (achado pelo harness: grafeno citado com
+  estrutura "monoclínica" — provavelmente outro alótropo de carbono do AFLOW/MP/OQMD, bancos
+  focados em estruturas 3D).
+* Expandir o golden dataset além das 16 perguntas-semente, e cobrir o parâmetro de ordenação por
+  data do Semantic Scholar (não validado por causa de rate limit sem `SEMANTIC_SCHOLAR_API_KEY`).
+* Observability real (LangSmith/Phoenix/OpenTelemetry) ou ao menos latência/tokens/custo por
+  pergunta no SQLite — hoje só salvamos pergunta/resposta, sem métricas.
 * Rodar `estimate_bulk_modulus` para mais de 1 candidato quando a latência permitir (hoje
   `limit=1` em `enrich_with_bulk_modulus`).
 * Fônons via M3GNet + `phonopy` (citado no roadmap V4, ainda não implementado — exige nova
   dependência e várias avaliações de força em supercélulas deslocadas).
-* Mais testes de regressão pra cada intent do V1-V6 (hoje só `material_search` tem um teste
-  ponta a ponta automatizado; `compare_materials`, `explain_material`, `paper_search`,
-  `simulation`, `material_discovery` foram validados manualmente nesta conversa, mas não têm
-  teste formal ainda).
+* Mais testes de regressão ponta a ponta pra cada intent do V1-V6 (hoje só `material_search` e
+  o golden dataset cobrem isso de forma automatizada).
 * Botões de feedback (👍/👎) no frontend — o endpoint `POST /api/feedback` já existe desde o V1,
   mas a UI nunca chamou ele.
 * DFT real via Quantum ESPRESSO, se algum dia precisão importar mais que velocidade (exigiria
   WSL2/conda no Windows e pseudopotenciais).
-* Harness/Evaluation/Observability (`Harness_Evaluation_Observability.md`): golden dataset,
-  LLM-as-judge, LangSmith/Phoenix/OpenTelemetry — não incluído nesta entrega.
 * Trocar Chroma → Pinecone e SQLite → PostgreSQL quando for para produção (`DATABASE_URL` e o
   módulo `rag/vectorstore.py` foram escritos para essa troca ser pontual).
 * Bayesian Optimization de verdade (Gaussian Process + função de aquisição) no lugar do ranking

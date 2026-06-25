@@ -1,5 +1,9 @@
+import pytest
+from pydantic import ValidationError
+
 from app.schemas.discovery import CriticVerdict, SubstitutionTarget
-from app.schemas.materials import CompareOutput, MaterialCandidate, MaterialSchema
+from app.schemas.evaluation import EvaluationScore
+from app.schemas.materials import CompareOutput, ElementSuggestion, MaterialCandidate, MaterialSchema
 from app.schemas.papers import PaperSchema
 from app.schemas.properties import PropertySchema
 
@@ -52,3 +56,30 @@ def test_critic_verdict():
     verdict = CriticVerdict(accepted=False, reasons=["instável"])
     assert verdict.accepted is False
     assert verdict.reasons == ["instável"]
+
+
+def test_element_suggestion():
+    suggestion = ElementSuggestion(elements=["Li", "P"])
+    assert suggestion.elements == ["Li", "P"]
+
+
+def test_evaluation_score_bounds():
+    score = EvaluationScore(
+        relevance=5,
+        faithfulness=5,
+        hallucination_risk=1,
+        confidence_calibration=5,
+        passed=True,
+        reasoning="ok",
+    )
+    assert score.passed is True
+
+    with pytest.raises(ValidationError):
+        EvaluationScore(
+            relevance=6,  # fora do intervalo 1-5
+            faithfulness=5,
+            hallucination_risk=1,
+            confidence_calibration=5,
+            passed=True,
+            reasoning="ok",
+        )
